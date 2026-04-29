@@ -6,8 +6,8 @@ import { useStoryStore } from '@/store/useStoryStore';
 
 function createRainTexture() {
   const canvas = document.createElement('canvas');
-  canvas.width = 4; // Much thinner for streak effect
-  canvas.height = 128; // Long streak
+  canvas.width = 90; // Much thinner for streak effect
+  canvas.height = 120; // Long streak
   const context = canvas.getContext('2d');
   if (context) {
     const gradient = context.createLinearGradient(0, 0, 0, 128);
@@ -21,16 +21,15 @@ function createRainTexture() {
   return texture;
 }
 
-export default function RainParticles({ count = 800 }) { // Reduced count to avoid visual noise
+export default function RainParticles({ count = 600 }) { // Reduced count to avoid visual noise
   const pointsRef = useRef<THREE.Points>(null);
   const materialRef = useRef<THREE.PointsMaterial>(null);
-
   const [particlesPosition] = useState(() => {
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 40; 
-      positions[i * 3 + 1] = Math.random() * 20; 
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 20; 
+      positions[i * 3] = (Math.random() - 0.5) * 40;
+      positions[i * 3 + 1] = Math.random() * 20;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
     }
     return positions;
   });
@@ -54,12 +53,12 @@ export default function RainParticles({ count = 800 }) { // Reduced count to avo
     timer.update();
     const delta = timer.getDelta();
     const progress = useStoryStore.getState().scrollProgress;
-    
+
     if (pointsRef.current) {
       const positions = pointsRef.current.geometry.attributes.position.array as Float32Array;
       // Slower, more elegant rain speed
       const speed = THREE.MathUtils.lerp(12, 2, Math.min(progress * 2, 1));
-      
+
       for (let i = 0; i < count; i++) {
         positions[i * 3 + 1] -= delta * speed;
         if (positions[i * 3 + 1] < -5) {

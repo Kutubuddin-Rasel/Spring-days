@@ -11,10 +11,10 @@ export default function StoryOverlay() {
 
   useGSAP(() => {
     const sections = gsap.utils.toArray('.story-section') as HTMLElement[];
-    
+
     sections.forEach((section) => {
       const text = section.querySelector('.story-text');
-      
+
       // Simple and elegant fade-in and subtle float up
       gsap.fromTo(
         text,
@@ -31,7 +31,7 @@ export default function StoryOverlay() {
           }
         }
       );
-      
+
       // Fade out as it goes up
       gsap.to(text, {
         opacity: 0,
@@ -55,22 +55,36 @@ export default function StoryOverlay() {
           Like the long winter in 'Spring Day', there are moments when the cold seems to linger, and the sky feels heavy...
         </p>
       </section>
-      
+
       <section className="story-section h-screen flex items-center justify-center p-8">
         <p className="story-text text-2xl md:text-4xl lg:text-5xl font-playfair text-white/90 text-center leading-relaxed tracking-wide drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] max-w-4xl">
-          But I've always admired how much you love the rain. It washes the world anew. And just like the sky after a storm, your true radiance—the beauty of your kind heart—shines brilliantly through any passing cloud.
+          But I've always admired how much you love the rain. It washes the world anew.
         </p>
       </section>
-      
       <section className="story-section h-screen flex items-center justify-center p-8">
         <p className="story-text text-2xl md:text-4xl lg:text-5xl font-playfair text-slate-800 text-center leading-relaxed tracking-wide drop-shadow-sm max-w-4xl">
-          No matter how much the seasons change, my promise remains. I will walk beside you through every storm, cherishing the beautiful person you are inside and out.
+          And just like the sky after a storm, your true radiance shines brilliantly through any passing cloud.
+        </p>
+      </section>
+      <section className="story-section h-screen flex items-center justify-center p-8">
+        <p className="story-text text-2xl md:text-4xl lg:text-5xl font-playfair text-slate-800 text-center leading-relaxed tracking-wide drop-shadow-sm max-w-4xl">
+          No matter how much the seasons change, my promise remains.
+        </p>
+      </section>
+      <section className="story-section h-screen flex items-center justify-center p-8">
+        <p className="story-text text-2xl md:text-4xl lg:text-5xl font-playfair text-slate-800 text-center leading-relaxed tracking-wide drop-shadow-sm max-w-4xl">
+          I will walk beside you through every storm, cherishing the beautiful person you are inside and out.
         </p>
       </section>
 
       <section className="story-section h-screen flex items-center justify-center p-8">
         <p className="story-text text-2xl md:text-4xl lg:text-5xl font-playfair text-slate-800 text-center leading-relaxed tracking-wide drop-shadow-sm max-w-4xl">
-          We only have to wait a little longer... until the spring days come. Because no winter lasts forever, and my favorite season will always be wherever you are.
+          We only have to wait a little longer... until the spring days come.
+        </p>
+      </section>
+      <section className="story-section h-screen flex items-center justify-center p-8">
+        <p className="story-text text-2xl md:text-4xl lg:text-5xl font-playfair text-slate-800 text-center leading-relaxed tracking-wide drop-shadow-sm max-w-4xl">
+          Because no winter lasts forever, and my favorite season will always be wherever you are.
         </p>
       </section>
     </div>
