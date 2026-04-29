@@ -8,7 +8,7 @@ import { useStoryStore } from '@/store/useStoryStore';
 //  CherryBlossomParticles: intensityT = clamp01((p - 0.38) / 0.22)
 //  Full blossom at p ≈ 0.60, EasterEggs trigger at p > 0.80
 // ─────────────────────────────────────────────────────────────
-const SPRING_APPEAR = 0.90; // matches PromisePlanting
+const SPRING_APPEAR = 0.95; // matches PromisePlanting
 const SPRING_FULL = 0.88; // fully saturated at this point
 
 // Sky palette mirror (CSS) — must match Scene.tsx SKY_STOPS

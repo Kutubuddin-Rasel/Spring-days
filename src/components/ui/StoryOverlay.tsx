@@ -128,7 +128,7 @@ export default function StoryOverlay() {
                 'font-playfair',
                 'leading-[1.45]',
                 'tracking-wide',
-                'max-w-[780px]',
+                'max-w-195',
                 'px-6',
                 'opacity-0',
                 // Responsive sizing
