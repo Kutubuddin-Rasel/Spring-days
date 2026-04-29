@@ -24,7 +24,7 @@ const PHRASES = [
 const IS_DARK_BG = [false, false, false, false, false, true, true];
 
 // Seconds each phrase holds at full opacity (in scrub-time units)
-const HOLD_UNITS = 2.2;
+const HOLD_UNITS = 1.2;
 // Transition units (blur-in / blur-out)
 const TRANS_UNITS = 1.4;
 // Total units per phrase

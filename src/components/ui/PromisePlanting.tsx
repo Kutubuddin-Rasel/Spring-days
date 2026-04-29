@@ -51,7 +51,7 @@ const FlowerSVG = () => (
 
 export default function PromisePlanting() {
   const scrollProgress = useStoryStore((state) => state.scrollProgress);
-  const isVisible = scrollProgress > 0.92; // Triggers earlier to leave scroll space
+  const isVisible = scrollProgress > 0.90; // Triggers earlier to leave scroll space
 
   const [blossoms, setBlossoms] = useState<Blossom[]>([]);
   const [currentPromiseIndex, setCurrentPromiseIndex] = useState(-1);
