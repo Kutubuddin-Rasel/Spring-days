@@ -19,6 +19,9 @@
 
 # production
 /build
+.leankg*
+.agents
+/leankg.yaml
 
 # misc
 .DS_Store
