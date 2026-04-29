@@ -15,29 +15,33 @@ export default function StoryOverlay() {
     sections.forEach((section) => {
       const text = section.querySelector('.story-text');
       
+      // Simple and elegant fade-in and subtle float up
       gsap.fromTo(
         text,
-        { opacity: 0, y: 50 },
+        { opacity: 0, y: 30 },
         {
           opacity: 1,
           y: 0,
+          ease: "power2.out",
           scrollTrigger: {
             trigger: section,
-            start: "top center",
-            end: "center center",
-            scrub: 1,
+            start: "top 70%", // Start fading in when the top of section is at 70% of viewport
+            end: "center center", // Fully visible at center
+            scrub: 2, // Smooth scrubbing
           }
         }
       );
       
+      // Fade out as it goes up
       gsap.to(text, {
         opacity: 0,
-        y: -50,
+        y: -30,
+        ease: "power2.in",
         scrollTrigger: {
           trigger: section,
           start: "center center",
-          end: "bottom center",
-          scrub: 1,
+          end: "bottom 30%", // Fully faded out when bottom is at 30% of viewport
+          scrub: 2,
         }
       });
     });
@@ -48,25 +52,25 @@ export default function StoryOverlay() {
       {/* 400vh total height (4 sections x 100vh) */}
       <section className="story-section h-screen flex items-center justify-center p-8">
         <p className="story-text text-2xl md:text-4xl lg:text-5xl font-playfair text-white/90 text-center leading-relaxed tracking-wide drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] max-w-4xl">
-          There are days when the sky feels heavy, and the cold seems to linger a little too long...
+          Like the long winter in 'Spring Day', there are moments when the cold seems to linger, and the sky feels heavy...
         </p>
       </section>
       
       <section className="story-section h-screen flex items-center justify-center p-8">
         <p className="story-text text-2xl md:text-4xl lg:text-5xl font-playfair text-white/90 text-center leading-relaxed tracking-wide drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)] max-w-4xl">
-          But I have always loved the rain. It washes the world anew, clearing the dust so the sky can breathe. And just like the sky, your light always shines beautifully through any passing cloud.
+          But I've always admired how much you love the rain. It washes the world anew. And just like the sky after a storm, your true radiance—the beauty of your kind heart—shines brilliantly through any passing cloud.
         </p>
       </section>
       
       <section className="story-section h-screen flex items-center justify-center p-8">
         <p className="story-text text-2xl md:text-4xl lg:text-5xl font-playfair text-slate-800 text-center leading-relaxed tracking-wide drop-shadow-sm max-w-4xl">
-          So let me walk beside you through the storms. We only have to wait a little longer...
+          No matter how much the seasons change, my promise remains. I will walk beside you through every storm, cherishing the beautiful person you are inside and out.
         </p>
       </section>
 
       <section className="story-section h-screen flex items-center justify-center p-8">
         <p className="story-text text-2xl md:text-4xl lg:text-5xl font-playfair text-slate-800 text-center leading-relaxed tracking-wide drop-shadow-sm max-w-4xl">
-          ...until the spring days come. Because no winter lasts forever, and in every season, my favorite view is you.
+          We only have to wait a little longer... until the spring days come. Because no winter lasts forever, and my favorite season will always be wherever you are.
         </p>
       </section>
     </div>

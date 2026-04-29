@@ -1,72 +1,135 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useStoryStore } from '@/store/useStoryStore';
 
-export default function CherryBlossomParticles({ count = 1500 }) {
-  const pointsRef = useRef<THREE.Points>(null);
-  const materialRef = useRef<THREE.PointsMaterial>(null);
-
-  const [particlesData] = useState(() => {
-    const positions = new Float32Array(count * 3);
-    const phases = new Float32Array(count);
+function createPetalTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const context = canvas.getContext('2d');
+  if (context) {
+    // Draw a soft petal shape
+    context.beginPath();
+    context.moveTo(32, 60);
+    context.bezierCurveTo(10, 40, 10, 10, 32, 5);
+    context.bezierCurveTo(54, 10, 54, 40, 32, 60);
     
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 20; // x
-      positions[i * 3 + 1] = Math.random() * 20; // y
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 20; // z
-      phases[i] = Math.random() * Math.PI * 2; // phase for swirling
-    }
-    return { positions, phases };
-  });
+    const gradient = context.createRadialGradient(32, 32, 5, 32, 32, 30);
+    gradient.addColorStop(0, 'rgba(255, 182, 193, 1)'); // Deep pink
+    gradient.addColorStop(0.6, 'rgba(255, 220, 225, 0.8)'); // Light pink
+    gradient.addColorStop(1, 'rgba(255, 240, 245, 0)'); // Fade out
 
-  useFrame((state, delta) => {
+    context.fillStyle = gradient;
+    context.fill();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  return texture;
+}
+
+export default function CherryBlossomParticles({ count = 500 }) {
+  const meshRef = useRef<THREE.InstancedMesh>(null);
+  
+  const dummy = useMemo(() => new THREE.Object3D(), []);
+  
+  // Per-instance physics data
+  const particlesData = useMemo(() => {
+    const data = [];
+    for (let i = 0; i < count; i++) {
+      data.push({
+        x: (Math.random() - 0.5) * 40,
+        y: Math.random() * 20 - 5,
+        z: (Math.random() - 0.5) * 20,
+        rotX: Math.random() * Math.PI,
+        rotY: Math.random() * Math.PI,
+        rotZ: Math.random() * Math.PI,
+        speed: 1 + Math.random() * 1.5,
+        spinX: (Math.random() - 0.5) * 2,
+        spinY: (Math.random() - 0.5) * 2,
+        spinZ: (Math.random() - 0.5) * 2,
+        scale: 0.5 + Math.random() * 0.8,
+        swirlPhase: Math.random() * Math.PI * 2,
+        swirlRadius: 0.5 + Math.random() * 2,
+      });
+    }
+    return data;
+  }, [count]);
+
+  const petalTexture = useMemo(() => {
+    if (typeof document !== 'undefined') {
+      return createPetalTexture();
+    }
+    return null;
+  }, []);
+
+  const [timer] = useState(() => new THREE.Timer());
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      timer.connect(document);
+    }
+  }, [timer]);
+
+  useFrame(() => {
+    timer.update();
+    const delta = timer.getDelta();
+    const elapsed = timer.getElapsed();
     const progress = useStoryStore.getState().scrollProgress;
 
-    if (pointsRef.current) {
-      const positions = pointsRef.current.geometry.attributes.position.array as Float32Array;
+    // Only start falling heavily as we transition out of winter (progress > 0.4)
+    const intensity = Math.max(0, (progress - 0.4) * 2);
+
+    if (meshRef.current) {
       for (let i = 0; i < count; i++) {
-        // Fall down slower than rain
-        positions[i * 3 + 1] -= delta * 2;
+        const p = particlesData[i];
+
+        // Fall down based on intensity
+        p.y -= p.speed * delta * (0.5 + intensity * 2);
         
-        // Swirl using phase and elapsed time
-        const phase = particlesData.phases[i];
-        positions[i * 3] += Math.sin(state.clock.elapsedTime + phase) * delta * 0.5;
+        // Swirl in X and Z
+        const swirlOffset = Math.sin(elapsed * p.speed + p.swirlPhase) * delta * p.swirlRadius;
+        p.x += swirlOffset;
+        p.z += Math.cos(elapsed * p.speed + p.swirlPhase) * delta * (p.swirlRadius * 0.5);
+
+        // Spin
+        p.rotX += p.spinX * delta;
+        p.rotY += p.spinY * delta;
+        p.rotZ += p.spinZ * delta;
 
         // Reset if too low
-        if (positions[i * 3 + 1] < -5) {
-          positions[i * 3 + 1] = 15;
-          positions[i * 3] = (Math.random() - 0.5) * 20;
+        if (p.y < -5) {
+          p.y = 15;
+          p.x = (Math.random() - 0.5) * 40;
         }
-      }
-      pointsRef.current.geometry.attributes.position.needsUpdate = true;
-    }
 
-    if (materialRef.current) {
-      // Fade in blossoms from progress 0.4 to 0.7
-      const opacity = progress < 0.4 ? 0 : progress > 0.7 ? 0.8 : 0.8 * ((progress - 0.4) / 0.3);
-      materialRef.current.opacity = opacity;
+        // Apply to dummy and set matrix
+        dummy.position.set(p.x, p.y, p.z);
+        dummy.rotation.set(p.rotX, p.rotY, p.rotZ);
+        
+        // Scale down to 0 if not spring yet
+        const currentScale = p.scale * THREE.MathUtils.lerp(0, 1, Math.min(1, intensity * 2));
+        dummy.scale.set(currentScale, currentScale, currentScale);
+        
+        dummy.updateMatrix();
+        meshRef.current.setMatrixAt(i, dummy.matrix);
+      }
+      meshRef.current.instanceMatrix.needsUpdate = true;
     }
   });
 
   return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[particlesData.positions, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        ref={materialRef}
-        size={0.15}
-        color="#ffb7c5"
-        transparent
-        opacity={0}
-        sizeAttenuation
+    <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
+      {/* Curved petal geometry */}
+      <sphereGeometry args={[0.2, 8, 8, 0, Math.PI, 0, Math.PI / 4]} />
+      <meshBasicMaterial 
+        map={petalTexture || undefined} 
+        color="#ffb6c1"
+        transparent 
+        opacity={0.85} 
+        side={THREE.DoubleSide}
         depthWrite={false}
       />
-    </points>
+    </instancedMesh>
   );
 }

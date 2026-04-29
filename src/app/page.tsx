@@ -3,6 +3,7 @@ import { useRef } from 'react';
 import Scene from '@/components/canvas/Scene';
 import AudioToggle from '@/components/ui/AudioToggle';
 import StoryOverlay from '@/components/ui/StoryOverlay';
+import PromisePlanting from '@/components/ui/PromisePlanting';
 import EasterEggs from '@/components/ui/EasterEggs';
 import { useStoryStore } from '@/store/useStoryStore';
 import gsap from 'gsap';
@@ -32,6 +33,9 @@ export default function Home() {
       <AudioToggle />
       <StoryOverlay />
       <EasterEggs />
+      <PromisePlanting />
+      {/* Extra space at the end for the climax features to breathe */}
+      <div className="h-[300vh] w-full" />
     </main>
   );
 }

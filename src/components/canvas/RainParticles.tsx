@@ -1,35 +1,67 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useStoryStore } from '@/store/useStoryStore';
 
-export default function RainParticles({ count = 2000 }) {
+function createRainTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 4; // Much thinner for streak effect
+  canvas.height = 128; // Long streak
+  const context = canvas.getContext('2d');
+  if (context) {
+    const gradient = context.createLinearGradient(0, 0, 0, 128);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)'); // Softer alpha
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, 4, 128);
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  return texture;
+}
+
+export default function RainParticles({ count = 800 }) { // Reduced count to avoid visual noise
   const pointsRef = useRef<THREE.Points>(null);
   const materialRef = useRef<THREE.PointsMaterial>(null);
 
   const [particlesPosition] = useState(() => {
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 20; // x
-      positions[i * 3 + 1] = Math.random() * 20; // y
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 20; // z
+      positions[i * 3] = (Math.random() - 0.5) * 40; 
+      positions[i * 3 + 1] = Math.random() * 20; 
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 20; 
     }
     return positions;
   });
 
-  useFrame((state, delta) => {
+  const rainTexture = useMemo(() => {
+    if (typeof document !== 'undefined') {
+      return createRainTexture();
+    }
+    return null;
+  }, []);
+
+  const [timer] = useState(() => new THREE.Timer());
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      timer.connect(document);
+    }
+  }, [timer]);
+
+  useFrame(() => {
+    timer.update();
+    const delta = timer.getDelta();
     const progress = useStoryStore.getState().scrollProgress;
     
     if (pointsRef.current) {
       const positions = pointsRef.current.geometry.attributes.position.array as Float32Array;
-      // Slow down the rain as spring approaches
-      const speed = THREE.MathUtils.lerp(15, 2, Math.min(progress * 2, 1));
+      // Slower, more elegant rain speed
+      const speed = THREE.MathUtils.lerp(12, 2, Math.min(progress * 2, 1));
       
       for (let i = 0; i < count; i++) {
-        // Fall down
         positions[i * 3 + 1] -= delta * speed;
-        // Reset if too low
         if (positions[i * 3 + 1] < -5) {
           positions[i * 3 + 1] = 15;
         }
@@ -38,8 +70,8 @@ export default function RainParticles({ count = 2000 }) {
     }
 
     if (materialRef.current) {
-      // Fade out rain from progress 0.2 to 0.5
-      const opacity = progress < 0.2 ? 0.6 : progress > 0.5 ? 0 : 0.6 * (1 - (progress - 0.2) / 0.3);
+      // Fade out rain gracefully
+      const opacity = progress < 0.15 ? 0.4 : progress > 0.4 ? 0 : 0.4 * (1 - (progress - 0.15) / 0.25);
       materialRef.current.opacity = opacity;
     }
   });
@@ -54,11 +86,12 @@ export default function RainParticles({ count = 2000 }) {
       </bufferGeometry>
       <pointsMaterial
         ref={materialRef}
-        size={0.05}
-        color="#8aa8cb"
+        size={0.8} // Scaled slightly to stretch the long texture
+        color="#7ca4d4" // Deeper, more subtle blue
         transparent
-        opacity={0.6}
-        sizeAttenuation
+        opacity={0.4}
+        map={rainTexture || undefined}
+        blending={THREE.AdditiveBlending}
         depthWrite={false}
       />
     </points>

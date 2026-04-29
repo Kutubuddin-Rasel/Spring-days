@@ -17,8 +17,8 @@ function EnvironmentManager() {
     const winterColor = new THREE.Color('#0a1128');
     const springColor = new THREE.Color('#fdf2f8');
     
-    // Transition from 0.3 to 0.7 progress
-    colorRef.current.lerpColors(winterColor, springColor, Math.min(1, Math.max(0, (progress - 0.3) / 0.4)));
+    // Transition from 0.15 to 0.35 progress (during Section 2 and 3)
+    colorRef.current.lerpColors(winterColor, springColor, Math.min(1, Math.max(0, (progress - 0.15) / 0.20)));
     
     scene.background = colorRef.current;
     if (scene.fog) {

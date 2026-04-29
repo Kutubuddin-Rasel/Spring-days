@@ -5,8 +5,8 @@ import { useStoryStore } from '@/store/useStoryStore';
 export default function EasterEggs() {
   const scrollProgress = useStoryStore((state) => state.scrollProgress);
   
-  // Show only in the final 15% of the scroll
-  const isVisible = scrollProgress > 0.85;
+  // Show only in the final 20% of the scroll
+  const isVisible = scrollProgress > 0.80;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-20 flex flex-col justify-between p-4 md:p-12 overflow-hidden">
