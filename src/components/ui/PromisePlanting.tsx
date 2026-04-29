@@ -34,14 +34,14 @@ const FlowerSVG = () => (
       strokeWidth="2"
       initial={{ pathLength: 0, fill: "rgba(244, 114, 182, 0)" }}
       animate={{ pathLength: 1, fill: "rgba(244, 114, 182, 0.4)" }}
-      transition={{ 
+      transition={{
         pathLength: { duration: 1.5, ease: "easeInOut" },
         fill: { duration: 1, delay: 1 }
       }}
     />
-    <motion.circle 
-      cx="50" cy="50" r="4" 
-      fill="#fdf2f8" 
+    <motion.circle
+      cx="50" cy="50" r="4"
+      fill="#fdf2f8"
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       transition={{ delay: 1.5, type: "spring" }}
@@ -51,8 +51,8 @@ const FlowerSVG = () => (
 
 export default function PromisePlanting() {
   const scrollProgress = useStoryStore((state) => state.scrollProgress);
-  const isVisible = scrollProgress > 0.80; // Triggers earlier to leave scroll space
-  
+  const isVisible = scrollProgress > 0.92; // Triggers earlier to leave scroll space
+
   const [blossoms, setBlossoms] = useState<Blossom[]>([]);
   const [currentPromiseIndex, setCurrentPromiseIndex] = useState(-1);
 
