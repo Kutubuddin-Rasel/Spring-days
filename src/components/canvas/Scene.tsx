@@ -1,7 +1,7 @@
 'use client';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment } from '@react-three/drei';
-import RainParticles from './RainParticles';
+import SnowParticles from './SnowParticles';
 import CherryBlossomParticles from './CherryBlossomParticles';
 import { useStoryStore } from '@/store/useStoryStore';
 import * as THREE from 'three';
@@ -17,8 +17,8 @@ function EnvironmentManager() {
     const winterColor = new THREE.Color('#0a1128');
     const springColor = new THREE.Color('#fdf2f8');
     
-    // Transition from 0.15 to 0.35 progress (during Section 2 and 3)
-    colorRef.current.lerpColors(winterColor, springColor, Math.min(1, Math.max(0, (progress - 0.15) / 0.20)));
+    // Transition from 0.55 to 0.70 progress (during Phrase 5: "until the spring days come")
+    colorRef.current.lerpColors(winterColor, springColor, Math.min(1, Math.max(0, (progress - 0.55) / 0.15)));
     
     scene.background = colorRef.current;
     if (scene.fog) {
@@ -34,9 +34,8 @@ export default function Scene() {
     <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
       <Canvas camera={{ position: [0, 0, 10], fov: 60 }}>
         <EnvironmentManager />
-        <RainParticles />
+        <SnowParticles />
         <CherryBlossomParticles />
-        <Environment preset="city" />
       </Canvas>
     </div>
   );

@@ -35,7 +35,7 @@ export default function Home() {
       <EasterEggs />
       <PromisePlanting />
       {/* Extra space at the end for the climax features to breathe */}
-      <div className="h-[300vh] w-full" />
+      <div className="h-[100vh] w-full" />
     </main>
   );
 }

@@ -88,7 +88,7 @@ export default function PromisePlanting() {
             className="absolute inset-0"
           >
             {/* The Central Seed / Plant Button */}
-            <div className="absolute inset-x-0 bottom-12 md:bottom-20 flex justify-center items-center flex-col gap-4">
+            <div className="absolute inset-x-0 bottom-16 md:bottom-24 flex justify-center items-center flex-col gap-6">
               <AnimatePresence>
                 {currentPromiseIndex < PROMISES.length - 1 && (
                   <>
@@ -96,17 +96,22 @@ export default function PromisePlanting() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.8 }}
-                      className="font-playfair text-lg text-pink-200/80 drop-shadow-[0_0_5px_rgba(244,114,182,0.5)]"
+                      className="font-playfair text-sm md:text-base text-slate-700 tracking-[0.2em] font-medium drop-shadow-[0_2px_10px_rgba(255,255,255,0.8)]"
                     >
                       {currentPromiseIndex === -1 ? "Touch the seed to bloom a promise" : "Keep blooming..."}
                     </motion.p>
                     <motion.button
-                      whileHover={{ scale: 1.1, boxShadow: "0 0 20px rgba(244,114,182,0.8)" }}
+                      whileHover={{ scale: 1.15 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={handlePlant}
-                      className="pointer-events-auto w-12 h-12 rounded-full bg-pink-500/20 border border-pink-300/50 backdrop-blur-md flex justify-center items-center shadow-[0_0_15px_rgba(244,114,182,0.5)] cursor-pointer"
+                      className="pointer-events-auto relative w-16 h-16 rounded-full flex justify-center items-center cursor-pointer group"
                     >
-                      <span className="w-3 h-3 rounded-full bg-pink-200 shadow-[0_0_10px_#fbcfe8] animate-pulse" />
+                      {/* Outer Glow / Pulse */}
+                      <div className="absolute inset-0 rounded-full bg-pink-300/30 animate-ping opacity-75" />
+                      {/* Mid Ring */}
+                      <div className="absolute inset-2 rounded-full border border-pink-400/50 group-hover:border-pink-400/80 transition-colors duration-500 shadow-[0_0_20px_rgba(244,114,182,0.6)]" />
+                      {/* Core */}
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-white to-pink-200 shadow-[0_0_15px_#fff,0_0_30px_#fbcfe8] group-hover:shadow-[0_0_25px_#fff,0_0_50px_#fbcfe8] transition-all duration-500" />
                     </motion.button>
                   </>
                 )}
@@ -157,7 +162,7 @@ export default function PromisePlanting() {
                   transition={{ delay: 1.5, duration: 2 }}
                   className="absolute inset-x-0 bottom-24 flex justify-center pointer-events-none"
                 >
-                  <p className="font-inter text-sm md:text-base text-pink-200/80 uppercase tracking-[0.3em] font-light drop-shadow-[0_0_8px_rgba(244,114,182,0.8)]">
+                  <p className="font-playfair text-lg md:text-xl text-slate-800 uppercase tracking-[0.4em] font-medium drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]">
                     Spring is finally here.
                   </p>
                 </motion.div>
