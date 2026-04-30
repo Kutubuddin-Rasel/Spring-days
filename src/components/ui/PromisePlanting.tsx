@@ -7,7 +7,6 @@ import { useStoryStore } from '@/store/useStoryStore';
 //  Spring easing curve — Apple's signature feel
 // ─────────────────────────────────────────────────────────────
 const APPLE_EASE = [0.22, 1, 0.36, 1] as const;
-const SPRING_SOFT = { stiffness: 80, damping: 20, mass: 0.8 };
 
 // ─────────────────────────────────────────────────────────────
 //  Per-promise ambient palette

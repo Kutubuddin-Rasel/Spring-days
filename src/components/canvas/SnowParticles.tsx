@@ -67,7 +67,7 @@ interface SnowPhysics {
 function buildPhysics(count: number): SnowPhysics[] {
   const arr: SnowPhysics[] = [];
   for (let i = 0; i < count; i++) {
-    const radius = 0.08 + Math.random() * 0.22; // 0.08–0.30 → size variety
+    const radius = 0.15 + Math.random() * 0.22; // 0.08–0.30 → size variety
     arr.push({
       x: (Math.random() - 0.5) * 44,
       y: -5 + Math.random() * 22,       // spread from -5 → 17
