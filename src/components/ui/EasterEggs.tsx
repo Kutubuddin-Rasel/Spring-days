@@ -34,15 +34,16 @@ const DESTINATIONS: Destination[] = [
 interface Treat {
   label: string;
   icon: string;
+  image: string;
   color: string;
   delay: number;
 }
 
 const TREATS: Treat[] = [
-  { label: 'Cookies & Cream', icon: '🍪', color: '#4a3b32', delay: 0.10 },
-  { label: 'Kinder Bueno', icon: '🍫', color: '#8b5a2b', delay: 0.22 },
-  { label: 'Ferrero Rocher', icon: '✨', color: '#d4af37', delay: 0.34 },
-  { label: 'Kinder Joy', icon: '🥚', color: '#cd5c5c', delay: 0.46 },
+  { label: 'Cookies & Cream', icon: '🍪', image: '/images/chocolates/cookies-and-creame.jpg', color: '#4a3b32', delay: 0.10 },
+  { label: 'Kinder Bueno', icon: '🍫', image: '/images/chocolates/kinder-bueno.jpeg', color: '#8b5a2b', delay: 0.22 },
+  { label: 'Ferrero Rocher', icon: '✨', image: '/images/chocolates/ferrero.jpg', color: '#d4af37', delay: 0.34 },
+  { label: 'Kinder Joy', icon: '🥚', image: '/images/chocolates/kinder-joy.jpg', color: '#cd5c5c', delay: 0.46 },
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -149,7 +150,7 @@ function PolaroidCard({ d, visible, isHero, layoutId }: { d: Destination; visibl
           <div
             className="absolute -top-[10px] left-1/2 -translate-x-1/2 z-20"
             style={{
-              width: isHero ? 80 : 44, 
+              width: isHero ? 80 : 44,
               height: isHero ? 36 : 20,
               background: `hsla(${d.hue}, 70%, 85%, 0.55)`,
               backdropFilter: 'blur(2px)',
@@ -160,16 +161,16 @@ function PolaroidCard({ d, visible, isHero, layoutId }: { d: Destination; visibl
           <div
             className="relative overflow-hidden flex items-center justify-center bg-slate-100"
             style={{
-              width: isHero ? 380 : 96, 
+              width: isHero ? 380 : 96,
               height: isHero ? 440 : 112,
               boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.08)',
             }}
           >
             {d.image ? (
               <>
-                <Image 
-                  src={d.image} 
-                  alt={d.name} 
+                <Image
+                  src={d.image}
+                  alt={d.name}
                   fill
                   sizes={isHero ? "600px" : "150px"}
                   quality={100}
@@ -232,17 +233,25 @@ function ArtisanalChocolate({ t, visible, isHero, layoutId }: { t: Treat; visibl
       )}
 
       <motion.div ref={ref} style={{ transform }} className="relative">
-        <div 
-          className="relative rounded-[6px] shadow-lg flex items-center justify-center overflow-hidden border border-white/20"
-          style={{ width: 44, height: 44, background: `linear-gradient(135deg, ${t.color} 0%, #1a0f08 100%)` }}
+        <div
+          className="relative rounded-[8px] shadow-lg flex items-center justify-center overflow-hidden border border-white/20 bg-[#1a0f08]"
+          style={{ width: 56, height: 56 }}
         >
-          {/* Gold Drizzle */}
-          <div className="absolute inset-0 opacity-40 mix-blend-overlay" style={{ background: 'repeating-linear-gradient(45deg, transparent, transparent 6px, #ffd700 6px, #ffd700 8px)' }} />
-          {/* Specular Sheen */}
-          <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/30 to-transparent" />
-          <span className="text-xl z-10 drop-shadow-md">{t.icon}</span>
+          <Image
+            src={t.image}
+            alt={t.label}
+            fill
+            sizes="100px"
+            quality={100}
+            className="object-cover"
+          />
+          {/* Subtle inner vignette to blend edges */}
+          <div className="absolute inset-0 shadow-[inset_0_0_12px_rgba(0,0,0,0.4)] pointer-events-none mix-blend-overlay" />
+
+          {/* Specular Sheen for glossy glass button look */}
+          <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/25 to-transparent pointer-events-none" />
         </div>
-        <div className="absolute inset-x-1 -bottom-2 h-2 rounded-full bg-black/20 blur-[3px]" />
+        <div className="absolute inset-x-2 -bottom-2 h-2 rounded-full bg-black/30 blur-[4px]" />
       </motion.div>
 
       {isHero && (
@@ -275,9 +284,9 @@ export default function EasterEggs() {
   const plantedCount = useStoryStore(s => s.plantedCount);
   const isHeroAnimating = useStoryStore(s => s.isHeroAnimating);
   const setHeroAnimating = useStoryStore(s => s.setHeroAnimating);
-  
+
   const [visible, setVisible] = useState(false);
-  
+
   useEffect(() => {
     return useStoryStore.subscribe(s => {
       setVisible(s.scrollProgress >= SPRING_APPEAR);
@@ -334,7 +343,7 @@ export default function EasterEggs() {
         {/* Hero Cinematic Portal */}
         <AnimatePresence>
           {heroIndex !== null && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -346,7 +355,7 @@ export default function EasterEggs() {
               )}
               {heroIndex === 4 && (
                 <div className="flex flex-col items-center gap-12">
-                  <motion.h4 
+                  <motion.h4
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="font-playfair text-2xl md:text-3xl text-slate-800 drop-shadow-md italic text-center px-4"
