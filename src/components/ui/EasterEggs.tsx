@@ -1,58 +1,52 @@
 'use client';
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { motion, useSpring, useTransform, MotionValue } from 'framer-motion';
+import Image from 'next/image';
+import { motion, useSpring, useTransform, MotionValue, AnimatePresence } from 'framer-motion';
 import { useStoryStore } from '@/store/useStoryStore';
 
 // ─────────────────────────────────────────────────────────────
-//  Design constants — tuned to sync with cherry blossom onset
-//  CherryBlossomParticles: intensityT = clamp01((p - 0.38) / 0.22)
-//  Full blossom at p ≈ 0.60, EasterEggs trigger at p > 0.80
+//  Design constants
 // ─────────────────────────────────────────────────────────────
-const SPRING_APPEAR = 0.95; // matches PromisePlanting
-const SPRING_FULL = 0.88; // fully saturated at this point
-
-// Sky palette mirror (CSS) — must match Scene.tsx SKY_STOPS
-// at progress > 0.80 sky is firmly in blossom/spring territory
-// We derive CSS vars here so the UI syncs with the WebGL sky.
-const SPRING_BG_TINT = 'rgba(252, 233, 240, 0.72)'; // ~#fce9f0 at 72%
+const SPRING_APPEAR = 0.95;
+const SPRING_FULL = 0.88;
+const SPRING_BG_TINT = 'rgba(252, 233, 240, 0.72)';
 
 // ─────────────────────────────────────────────────────────────
 //  Data
 // ─────────────────────────────────────────────────────────────
 interface Destination {
+  image?: string;
   emoji: string;
   name: string;
-  sub: string;    // subtle descriptor that appears on hover
-  hue: number;    // accent hue for card glow (HSL)
-  delay: number;  // stagger offset (seconds)
-  rotate: number; // resting tilt
+  sub: string;
+  hue: number;
+  delay: number;
+  rotate: number;
 }
 
 const DESTINATIONS: Destination[] = [
-  { emoji: '🇯🇵', name: 'Japan', sub: 'Cherry blossom season', hue: 340, delay: 0.00, rotate: -3 },
-  { emoji: '🇰🇷', name: 'South Korea', sub: 'Lotte World & Han River', hue: 210, delay: 0.12, rotate: 4 },
-  { emoji: '🇫🇷', name: 'Paris', sub: 'Café au lait & the Louvre', hue: 30, delay: 0.24, rotate: -2 },
-  { emoji: '🇨🇭', name: 'Switzerland', sub: 'Alps & fondue for two', hue: 120, delay: 0.36, rotate: 3 },
+  { image: '/images/japan/CheeryTree-MountFuji.avif', emoji: '🇯🇵', name: 'Japan', sub: 'Our dream spring together', hue: 340, delay: 0.00, rotate: -3 },
+  { image: '/images/south/south-korea-han-river-walkside.avif', emoji: '🇰🇷', name: 'South Korea', sub: 'Walking the Han River, hand in hand', hue: 210, delay: 0.12, rotate: 4 },
+  { image: '/images/paris/paris-cafe.avif', emoji: '🇫🇷', name: 'Paris', sub: 'A café for two, just you and me', hue: 30, delay: 0.24, rotate: -2 },
+  { image: '/images/swiz/Swiz-Lauterbrunnen-street.avif', emoji: '🇨🇭', name: 'Switzerland', sub: 'Our alpine getaway', hue: 120, delay: 0.36, rotate: 3 },
 ];
 
 interface Treat {
   label: string;
-  icon: string;   // emoji fallback
-  color: string;  // chocolate shell colour
-  sheen: string;  // specular highlight colour
+  icon: string;
+  color: string;
   delay: number;
 }
 
 const TREATS: Treat[] = [
-  { label: 'Cookies & Cream', icon: '🍪', color: '#2a1e14', sheen: '#c8a87a', delay: 0.10 },
-  { label: 'Kinder Bueno', icon: '🍫', color: '#3b1f0a', sheen: '#d4a86c', delay: 0.22 },
-  { label: 'Ferrero Rocher', icon: '✨', color: '#4a2e08', sheen: '#d4af37', delay: 0.34 },
-  { label: 'Kinder Joy', icon: '🥚', color: '#c5340a', sheen: '#f4a261', delay: 0.46 },
+  { label: 'Cookies & Cream', icon: '🍪', color: '#4a3b32', delay: 0.10 },
+  { label: 'Kinder Bueno', icon: '🍫', color: '#8b5a2b', delay: 0.22 },
+  { label: 'Ferrero Rocher', icon: '✨', color: '#d4af37', delay: 0.34 },
+  { label: 'Kinder Joy', icon: '🥚', color: '#cd5c5c', delay: 0.46 },
 ];
 
 // ─────────────────────────────────────────────────────────────
-//  Smooth scroll-progress → CSS value bridge
-//  Reads from Zustand 60fps and feeds a spring
+//  Hooks
 // ─────────────────────────────────────────────────────────────
 function useScrollProgress(): MotionValue<number> {
   const mv = useSpring(0, { stiffness: 80, damping: 20, mass: 0.6 });
@@ -68,10 +62,6 @@ function useScrollProgress(): MotionValue<number> {
   return mv;
 }
 
-// ─────────────────────────────────────────────────────────────
-//  3-D tilt card hook
-//  Returns { ref, style } — attach to the outer div
-// ─────────────────────────────────────────────────────────────
 function useTilt3D(strength = 18) {
   const ref = useRef<HTMLDivElement>(null);
   const rotX = useSpring(0, { stiffness: 260, damping: 28 });
@@ -84,7 +74,7 @@ function useTilt3D(strength = 18) {
     const el = ref.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
-    const nx = (e.clientX - r.left) / r.width - 0.5; // -0.5 → 0.5
+    const nx = (e.clientX - r.left) / r.width - 0.5;
     const ny = (e.clientY - r.top) / r.height - 0.5;
     rotX.set(-ny * strength);
     rotY.set(nx * strength);
@@ -112,7 +102,6 @@ function useTilt3D(strength = 18) {
     };
   }, [onMove, onEnter, onLeave]);
 
-  // Build the transform string as a MotionValue
   const transform = useTransform(
     [rotX, rotY, scale] as MotionValue<number>[],
     ([rx, ry, sc]: number[]) =>
@@ -123,252 +112,159 @@ function useTilt3D(strength = 18) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Polaroid card — 3-D tilt + spring mount
+//  Polaroid Card — with Hero Mode Support
 // ─────────────────────────────────────────────────────────────
-function PolaroidCard({ d, visible }: { d: Destination; visible: boolean }) {
-  const { ref, transform, glowX, glowY } = useTilt3D(16);
-
-  const glowBg = useTransform(
-    [glowX, glowY] as MotionValue<number>[],
-    ([gx, gy]: number[]) =>
-      `radial-gradient(circle at ${gx}% ${gy}%, hsla(${d.hue},80%,80%,0.35) 0%, transparent 70%)`,
-  );
+function PolaroidCard({ d, visible, isHero, layoutId }: { d: Destination; visible: boolean; isHero?: boolean; layoutId?: string }) {
+  const { ref, transform } = useTilt3D(isHero ? 25 : 16);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: -36, rotate: d.rotate - 4, scale: 0.88 }}
+      layoutId={layoutId}
+      initial={{ opacity: 0, y: -36, rotate: d.rotate - 4 }}
       animate={visible
-        ? { opacity: 1, y: 0, rotate: d.rotate, scale: 1 }
-        : { opacity: 0, y: -36, rotate: d.rotate - 4, scale: 0.88 }
+        ? { opacity: 1, y: 0, rotate: isHero ? 0 : d.rotate }
+        : { opacity: 0, y: -36, rotate: d.rotate - 4 }
       }
       transition={{
-        delay: visible ? d.delay : 0,
-        duration: 0.72,
-        ease: [0.22, 1, 0.36, 1], // custom spring-like cubic — Apple's signature
+        delay: visible && !isHero ? d.delay : 0,
+        duration: isHero ? 0.8 : 0.72,
+        ease: [0.22, 1, 0.36, 1],
       }}
-      // pointer-events so the 3-D tilt works
-      className="pointer-events-auto"
-      style={{ transformStyle: 'preserve-3d' }}
+      className="pointer-events-auto origin-center"
+      style={{ transformStyle: 'preserve-3d', zIndex: isHero ? 100 : 1 }}
     >
-      {/* 3-D tilt wrapper */}
       <motion.div
         ref={ref}
         style={{ transform, transformStyle: 'preserve-3d' }}
         className="relative cursor-pointer select-none"
       >
-        {/* ── Card body ── */}
         <div
           className="relative flex flex-col items-center gap-0 rounded-[3px] shadow-[0_12px_40px_-8px_rgba(0,0,0,0.22),0_2px_8px_rgba(0,0,0,0.10)]"
           style={{
             background: 'linear-gradient(160deg, #fdfbf6 0%, #f8f3ec 100%)',
-            padding: '10px 10px 20px',
+            padding: isHero ? '20px 20px 40px' : '10px 10px 20px',
             border: '1px solid rgba(200,185,168,0.5)',
           }}
         >
-          {/* Dynamic gloss layer */}
-          <motion.div
-            className="absolute inset-0 rounded-[3px] pointer-events-none z-10"
-            style={{ background: glowBg }}
-          />
-
-          {/* Washi tape */}
           <div
             className="absolute -top-[10px] left-1/2 -translate-x-1/2 z-20"
             style={{
-              width: 44, height: 20,
+              width: isHero ? 80 : 44, 
+              height: isHero ? 36 : 20,
               background: `hsla(${d.hue}, 70%, 85%, 0.55)`,
               backdropFilter: 'blur(2px)',
               transform: `rotate(${d.rotate * -0.6}deg)`,
               boxShadow: '0 1px 4px rgba(0,0,0,0.10)',
             }}
           />
-
-          {/* Photo area */}
           <div
-            className="relative overflow-hidden flex items-center justify-center"
+            className="relative overflow-hidden flex items-center justify-center bg-slate-100"
             style={{
-              width: 96, height: 112,
-              background: `linear-gradient(135deg, hsla(${d.hue},40%,90%,0.6), hsla(${d.hue},30%,80%,0.4))`,
+              width: isHero ? 380 : 96, 
+              height: isHero ? 440 : 112,
               boxShadow: 'inset 0 1px 4px rgba(0,0,0,0.08)',
             }}
           >
-            {/* Emoji */}
-            <span
-              className="text-[2.6rem] transition-transform duration-500 group-hover:scale-110"
-              style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.18))' }}
-            >
-              {d.emoji}
-            </span>
-
-            {/* Inner vignette */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background:
-                  'radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.08) 100%)',
-              }}
-            />
+            {d.image ? (
+              <>
+                <Image 
+                  src={d.image} 
+                  alt={d.name} 
+                  fill
+                  sizes={isHero ? "600px" : "150px"}
+                  quality={100}
+                  priority={isHero}
+                  className="object-cover transition-transform duration-700 ease-out hover:scale-105"
+                />
+                <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,0.4)] pointer-events-none" />
+                {/* Subtle glossy reflection without mix-blend wash-out */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/20 pointer-events-none" />
+              </>
+            ) : (
+              <>
+                <span className="transition-transform duration-500 group-hover:scale-110" style={{ fontSize: isHero ? '10rem' : '2.6rem', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.18))' }}>
+                  {d.emoji}
+                </span>
+                <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.08) 100%)' }} />
+              </>
+            )}
           </div>
-
-          {/* Label */}
-          <p
-            className="mt-2 text-center font-playfair italic text-slate-700 leading-none"
-            style={{ fontSize: 13, letterSpacing: '0.04em' }}
-          >
+          <p className="mt-3 text-center font-playfair italic text-slate-800 leading-none drop-shadow-sm" style={{ fontSize: isHero ? 36 : 14, letterSpacing: '0.04em' }}>
             {d.name}
           </p>
-
-          {/* Sub-label (fades in on hover) */}
-          <p
-            className="text-center text-slate-400 leading-none mt-[3px] transition-opacity duration-300"
-            style={{ fontSize: 9, letterSpacing: '0.08em', opacity: 0.6 }}
-          >
+          <p className="text-center font-medium text-slate-600 leading-none transition-opacity duration-300" style={{ fontSize: isHero ? 22 : 10, letterSpacing: '0.06em', marginTop: isHero ? '12px' : '4px', opacity: 0.9 }}>
             {d.sub}
           </p>
-
-          {/* Realistic paper edge highlight */}
-          <div
-            className="absolute inset-x-0 top-0 h-px rounded-t-[3px] pointer-events-none"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent)' }}
-          />
+          <div className="absolute inset-x-0 top-0 h-px rounded-t-[3px] pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent)' }} />
         </div>
-
-        {/* Cast shadow plane (z-translated back) */}
-        <div
-          className="absolute inset-x-2 -bottom-3 h-4 rounded-full pointer-events-none"
-          style={{
-            background: 'rgba(0,0,0,0.12)',
-            filter: 'blur(8px)',
-            transform: 'translateZ(-10px)',
-          }}
-        />
+        <div className="absolute inset-x-2 -bottom-3 h-4 rounded-full pointer-events-none" style={{ background: 'rgba(0,0,0,0.12)', filter: 'blur(8px)', transform: 'translateZ(-10px)' }} />
       </motion.div>
     </motion.div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Truffle — 3-D sphere with specular, rim, and label reveal
+//  Artisanal Chocolate Redux
 // ─────────────────────────────────────────────────────────────
-function TruffleButton({ t, visible }: { t: Treat; visible: boolean }) {
+function ArtisanalChocolate({ t, visible, isHero, layoutId }: { t: Treat; visible: boolean; isHero?: boolean; layoutId?: string }) {
   const [hovered, setHovered] = useState(false);
-  const { ref, transform } = useTilt3D(22);
+  const { ref, transform } = useTilt3D(isHero ? 25 : 20);
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 40, scale: 0.8 }}
-      animate={visible
-        ? { opacity: 1, x: 0, scale: 1 }
-        : { opacity: 0, x: 40, scale: 0.8 }
-      }
-      transition={{
-        delay: visible ? t.delay : 0,
-        duration: 0.65,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-      className="pointer-events-auto flex items-center justify-end gap-3 group cursor-pointer"
+      layoutId={layoutId}
+      initial={{ opacity: 0, scale: 0.8, x: isHero ? 0 : 40 }}
+      animate={visible ? { opacity: 1, scale: isHero ? 1.4 : 1, x: 0 } : { opacity: 0, scale: 0.8, x: 40 }}
+      transition={{ type: 'spring', stiffness: 90, damping: 16 }}
+      className={`pointer-events-auto flex group cursor-pointer ${isHero ? 'flex-col items-center gap-4' : 'flex-row items-center justify-end gap-3'}`}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
     >
-      {/* Label — slides in from right on hover */}
-      <motion.span
-        initial={false}
-        animate={{
-          opacity: hovered ? 1 : 0,
-          x: hovered ? 0 : 10,
-          filter: hovered ? 'blur(0px)' : 'blur(4px)',
-        }}
-        transition={{ duration: 0.28, ease: 'easeOut' }}
-        className="font-playfair italic text-slate-700 tracking-widest whitespace-nowrap"
-        style={{ fontSize: 11, letterSpacing: '0.22em' }}
-      >
-        {t.label}
-      </motion.span>
-
-      {/* 3-D sphere */}
-      <motion.div
-        ref={ref}
-        style={{ transform }}
-        className="relative"
-      >
-        {/* Outer shell */}
-        <div
-          className="relative rounded-full flex items-center justify-center transition-shadow duration-300"
-          style={{
-            width: 38, height: 38,
-            background: `radial-gradient(circle at 36% 32%, ${t.sheen} 0%, ${t.color} 55%, #0a0600 100%)`,
-            boxShadow: hovered
-              ? `0 0 0 1px ${t.sheen}55, 0 6px 20px ${t.color}88, 0 0 30px ${t.sheen}44`
-              : `0 3px 10px ${t.color}66, 0 1px 3px rgba(0,0,0,0.4)`,
-          }}
+      {!isHero && (
+        <motion.span
+          initial={false}
+          animate={{ opacity: hovered ? 1 : 0, x: hovered ? 0 : 10, filter: hovered ? 'blur(0px)' : 'blur(4px)' }}
+          className="font-playfair italic text-slate-700 tracking-widest whitespace-nowrap bg-white/40 backdrop-blur-sm px-2 py-0.5 rounded-sm"
+          style={{ fontSize: 11 }}
         >
-          {/* Specular highlight — teardrop shaped */}
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              width: 12, height: 8,
-              top: 7, left: 9,
-              background: `radial-gradient(ellipse, ${t.sheen}cc 0%, transparent 100%)`,
-              transform: 'rotate(-30deg)',
-              filter: 'blur(1px)',
-            }}
-          />
+          {t.label}
+        </motion.span>
+      )}
 
-          {/* Secondary bounce light (bottom-right) */}
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              width: 8, height: 6,
-              bottom: 7, right: 7,
-              background: `radial-gradient(ellipse, rgba(255,255,255,0.18) 0%, transparent 100%)`,
-              filter: 'blur(1.5px)',
-            }}
-          />
-
-          {/* Rim light ring */}
-          <div
-            className="absolute inset-0 rounded-full pointer-events-none"
-            style={{
-              background:
-                'radial-gradient(circle at 75% 75%, rgba(255,255,255,0.10) 0%, transparent 55%)',
-            }}
-          />
-
-          {/* Gold rim border */}
-          <div
-            className="absolute inset-0 rounded-full pointer-events-none"
-            style={{
-              boxShadow: `inset 0 0 0 1px ${t.sheen}33`,
-            }}
-          />
+      <motion.div ref={ref} style={{ transform }} className="relative">
+        <div 
+          className="relative rounded-[6px] shadow-lg flex items-center justify-center overflow-hidden border border-white/20"
+          style={{ width: 44, height: 44, background: `linear-gradient(135deg, ${t.color} 0%, #1a0f08 100%)` }}
+        >
+          {/* Gold Drizzle */}
+          <div className="absolute inset-0 opacity-40 mix-blend-overlay" style={{ background: 'repeating-linear-gradient(45deg, transparent, transparent 6px, #ffd700 6px, #ffd700 8px)' }} />
+          {/* Specular Sheen */}
+          <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/30 to-transparent" />
+          <span className="text-xl z-10 drop-shadow-md">{t.icon}</span>
         </div>
-
-        {/* Shadow disc */}
-        <div
-          className="absolute inset-x-1 -bottom-2 h-2 rounded-full pointer-events-none"
-          style={{
-            background: `radial-gradient(ellipse, ${t.color}55, transparent)`,
-            filter: 'blur(4px)',
-          }}
-        />
+        <div className="absolute inset-x-1 -bottom-2 h-2 rounded-full bg-black/20 blur-[3px]" />
       </motion.div>
+
+      {isHero && (
+        <motion.span
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="font-playfair italic text-slate-800 bg-white/60 backdrop-blur-md px-3 py-1 rounded-full shadow-sm text-center"
+          style={{ fontSize: 13 }}
+        >
+          {t.label}
+        </motion.span>
+      )}
     </motion.div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Ambient petal echo — small decorative petals that drift
-//  across the EasterEggs layer, perfectly synced with the
-//  CherryBlossomParticles intensity ramp (onset at p=0.38,
-//  full at p=0.60).  These are pure CSS so they cost nothing.
+//  Ambient petal echo
 // ─────────────────────────────────────────────────────────────
 const ECHO_PETALS = Array.from({ length: 9 }, (_, i) => ({
-  id: i,
-  left: `${8 + i * 10.5}%`,
-  delay: `${i * 0.55}s`,
-  duration: `${3.8 + (i % 3) * 0.9}s`,
-  size: 10 + (i % 4) * 5,
-  hue: 338 + (i % 5) * 5,
+  id: i, left: `${8 + i * 10.5}%`, delay: `${i * 0.55}s`, duration: `${3.8 + (i % 3) * 0.9}s`, size: 10 + (i % 4) * 5, hue: 338 + (i % 5) * 5,
 }));
 
 // ─────────────────────────────────────────────────────────────
@@ -376,31 +272,43 @@ const ECHO_PETALS = Array.from({ length: 9 }, (_, i) => ({
 // ─────────────────────────────────────────────────────────────
 export default function EasterEggs() {
   const progress = useScrollProgress();
-  const rawProgress = useStoryStore(s => s.scrollProgress);
-
-  // Derive visibility as a boolean (avoids render on every frame)
+  const plantedCount = useStoryStore(s => s.plantedCount);
+  const isHeroAnimating = useStoryStore(s => s.isHeroAnimating);
+  const setHeroAnimating = useStoryStore(s => s.setHeroAnimating);
+  
   const [visible, setVisible] = useState(false);
+  
   useEffect(() => {
-    // Subscribe to raw store — faster than React re-render
     return useStoryStore.subscribe(s => {
       setVisible(s.scrollProgress >= SPRING_APPEAR);
     });
   }, []);
 
-  // ── Background tint opacity: 0 before SPRING_APPEAR, 1 at SPRING_FULL ──
-  const overlayOpacity = useTransform(
-    progress,
-    [SPRING_APPEAR - 0.02, SPRING_FULL],
-    [0, 1],
-  );
+  // Hero Timer
+  useEffect(() => {
+    if (isHeroAnimating) {
+      const timer = setTimeout(() => {
+        setHeroAnimating(false);
+      }, 2500); // Wait 2.5 seconds before returning
+      return () => clearTimeout(timer);
+    }
+  }, [isHeroAnimating, setHeroAnimating]);
 
-  // ── Petal echo opacity syncs with CherryBlossomParticles ──
-  // intensity = clamp01((p - 0.38) / 0.22) → full at 0.60
-  const petalOpacity = useTransform(
-    progress,
-    [0.38, 0.60, SPRING_APPEAR],
-    [0, 0.55, 0.85],
-  );
+  const heroIndex = isHeroAnimating && plantedCount > 0 ? plantedCount - 1 : null;
+
+  const overlayOpacity = useTransform(progress, [SPRING_APPEAR - 0.02, SPRING_FULL], [0, 1]);
+  const surge = useSpring(0, { stiffness: 300, damping: 20 });
+
+  useEffect(() => {
+    if (plantedCount > 0) {
+      surge.set(1);
+      const timeout = setTimeout(() => surge.set(0), 300);
+      return () => clearTimeout(timeout);
+    }
+  }, [plantedCount, surge]);
+
+  const basePetalOpacity = useTransform(progress, [0.38, 0.60, SPRING_APPEAR], [0, 0.55, 0.85]);
+  const petalOpacity = useTransform([basePetalOpacity, surge] as MotionValue<number>[], ([base, s]: number[]) => Math.min(1, base + s * 0.4));
 
   return (
     <>
@@ -408,39 +316,11 @@ export default function EasterEggs() {
       <div className="fixed inset-0 pointer-events-none z-10 overflow-hidden">
         <motion.div style={{ opacity: petalOpacity }} className="absolute inset-0">
           {ECHO_PETALS.map(p => (
-            <div
-              key={p.id}
-              className="absolute top-0"
-              style={{
-                left: p.left,
-                width: p.size,
-                height: p.size * 1.55,
-                animationName: 'petalDrift',
-                animationDuration: p.duration,
-                animationDelay: p.delay,
-                animationTimingFunction: 'ease-in-out',
-                animationIterationCount: 'infinite',
-                animationFillMode: 'both',
-              }}
-            >
-              <svg viewBox="0 0 40 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
-                <path
-                  d="M20 62 C6 46 4 14 20 2 C36 14 34 46 20 62Z"
-                  fill={`hsla(${p.hue}, 80%, 88%, 0.72)`}
-                />
-                <path
-                  d="M20 62 C6 46 4 14 20 2 C36 14 34 46 20 62Z"
-                  stroke={`hsla(${p.hue}, 70%, 75%, 0.30)`}
-                  strokeWidth="0.5"
-                  fill="none"
-                />
-                {/* Centre vein */}
-                <path
-                  d="M20 58 Q20 32 20 6"
-                  stroke={`hsla(${p.hue}, 50%, 68%, 0.22)`}
-                  strokeWidth="0.6"
-                  fill="none"
-                />
+            <div key={p.id} className="absolute top-0" style={{ left: p.left, width: p.size, height: p.size * 1.55, animation: `petalDrift ${p.duration} ease-in-out ${p.delay} infinite both` }}>
+              <svg viewBox="0 0 40 64" fill="none" style={{ width: '100%', height: '100%' }}>
+                <path d="M20 62 C6 46 4 14 20 2 C36 14 34 46 20 62Z" fill={`hsla(${p.hue}, 80%, 88%, 0.72)`} />
+                <path d="M20 62 C6 46 4 14 20 2 C36 14 34 46 20 62Z" stroke={`hsla(${p.hue}, 70%, 75%, 0.30)`} strokeWidth="0.5" />
+                <path d="M20 58 Q20 32 20 6" stroke={`hsla(${p.hue}, 50%, 68%, 0.22)`} strokeWidth="0.6" />
               </svg>
             </div>
           ))}
@@ -449,39 +329,70 @@ export default function EasterEggs() {
 
       {/* ── Main UI layer ── */}
       <div className="fixed inset-0 pointer-events-none z-20 overflow-hidden">
-        {/* Warm spring tint that syncs with the WebGL sky at p≈0.80+ */}
-        <motion.div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            opacity: overlayOpacity,
-            background: `radial-gradient(ellipse 90% 70% at 50% 110%, ${SPRING_BG_TINT} 0%, transparent 80%)`,
-          }}
-        />
+        <motion.div className="absolute inset-0 pointer-events-none" style={{ opacity: overlayOpacity, background: `radial-gradient(ellipse 90% 70% at 50% 110%, ${SPRING_BG_TINT} 0%, transparent 80%)` }} />
 
-        {/* ── Polaroid grid — 2×2 corners ── */}
+        {/* Hero Cinematic Portal */}
+        <AnimatePresence>
+          {heroIndex !== null && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="fixed inset-0 z-[100] flex flex-col items-center justify-center pointer-events-none pb-[12vh]"
+            >
+              {heroIndex < 4 && (
+                <PolaroidCard layoutId={`polaroid-${DESTINATIONS[heroIndex].name}`} d={DESTINATIONS[heroIndex]} visible={true} isHero={true} />
+              )}
+              {heroIndex === 4 && (
+                <div className="flex flex-col items-center gap-12">
+                  <motion.h4 
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="font-playfair text-2xl md:text-3xl text-slate-800 drop-shadow-md italic text-center px-4"
+                  >
+                    Your favorite treats, waiting for you...
+                  </motion.h4>
+                  <div className="flex flex-wrap justify-center gap-12 md:gap-20 max-w-4xl px-4 mt-6">
+                    {TREATS.map((t) => (
+                      <ArtisanalChocolate key={t.label} layoutId={`treat-${t.label}`} t={t} visible={true} isHero={true} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Corner Layout Grids ── */}
         <div className="absolute inset-x-0 top-0 flex justify-between items-start px-4 md:px-10 pt-6">
           {/* Top-left: Japan */}
-          <PolaroidCard d={DESTINATIONS[0]} visible={visible} />
+          <div className="w-[120px]">
+            {heroIndex !== 0 && <PolaroidCard layoutId={`polaroid-${DESTINATIONS[0].name}`} d={DESTINATIONS[0]} visible={visible && plantedCount >= 1} />}
+          </div>
           {/* Top-right: South Korea */}
-          <PolaroidCard d={DESTINATIONS[1]} visible={visible} />
+          <div className="w-[120px]">
+            {heroIndex !== 1 && <PolaroidCard layoutId={`polaroid-${DESTINATIONS[1].name}`} d={DESTINATIONS[1]} visible={visible && plantedCount >= 2} />}
+          </div>
         </div>
 
-        <div
-          className="absolute inset-x-0 flex justify-between items-end px-4 md:px-10"
-          style={{ bottom: 80 }}
-        >
+        <div className="absolute inset-x-0 flex justify-between items-end px-4 md:px-10" style={{ bottom: 80 }}>
           {/* Bottom-left group: Paris + Switzerland */}
           <div className="flex gap-3 md:gap-5 items-end">
-            <PolaroidCard d={DESTINATIONS[2]} visible={visible} />
-            <div className="hidden md:block">
-              <PolaroidCard d={DESTINATIONS[3]} visible={visible} />
+            <div className="w-[120px]">
+              {heroIndex !== 2 && <PolaroidCard layoutId={`polaroid-${DESTINATIONS[2].name}`} d={DESTINATIONS[2]} visible={visible && plantedCount >= 3} />}
+            </div>
+            <div className="hidden md:block w-[120px]">
+              {heroIndex !== 3 && <PolaroidCard layoutId={`polaroid-${DESTINATIONS[3].name}`} d={DESTINATIONS[3]} visible={visible && plantedCount >= 4} />}
             </div>
           </div>
 
           {/* Bottom-right: Truffles column */}
-          <div className="flex flex-col gap-[10px] items-end">
-            {TREATS.map(t => (
-              <TruffleButton key={t.label} t={t} visible={visible} />
+          <div className="flex flex-col gap-[12px] items-end">
+            {TREATS.map((t, index) => (
+              <div key={t.label} className="h-[44px]">
+                {heroIndex !== 4 && <ArtisanalChocolate layoutId={`treat-${t.label}`} t={t} visible={visible && plantedCount >= 5} />}
+              </div>
             ))}
           </div>
         </div>
