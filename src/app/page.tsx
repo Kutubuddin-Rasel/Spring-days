@@ -5,6 +5,7 @@ import AudioToggle from '@/components/ui/AudioToggle';
 import StoryOverlay from '@/components/ui/StoryOverlay';
 import PromisePlanting from '@/components/ui/PromisePlanting';
 import EasterEggs from '@/components/ui/EasterEggs';
+import GenieWish from '@/components/ui/GenieWish';
 import { useStoryStore } from '@/store/useStoryStore';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -19,8 +20,8 @@ export default function Home() {
   useGSAP(() => {
     ScrollTrigger.create({
       trigger: mainRef.current,
-      start: "top top",
-      end: "bottom bottom",
+      start: 'top top',
+      end: 'bottom bottom',
       onUpdate: (self) => {
         setScrollProgress(self.progress);
       }
@@ -34,8 +35,9 @@ export default function Home() {
       <StoryOverlay />
       <EasterEggs />
       <PromisePlanting />
+      <GenieWish />
       {/* Extra space at the end for the climax features to breathe */}
-      <div className="h-[100vh] w-full" />
+      <div className="h-screen w-full" />
     </main>
   );
 }
