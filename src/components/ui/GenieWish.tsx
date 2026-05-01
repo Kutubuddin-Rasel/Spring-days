@@ -15,10 +15,10 @@ const EASE_IN = [0.55, 0, 1, 0.45] as const;
 
 // Apple-level spring presets — tuned for overdamped, fluid feel
 // Rule of thumb: damping ≥ 2×sqrt(stiffness) for no bounce
-const SPRING_ENTER   = { type: 'spring', stiffness: 160, damping: 24 } as const;
-const SPRING_EXPAND  = { type: 'spring', stiffness: 220, damping: 30 } as const;
-const SPRING_RECEDE  = { type: 'spring', stiffness: 200, damping: 30 } as const;
-const SPRING_SEND    = { type: 'spring', stiffness: 280, damping: 32 } as const;
+const SPRING_ENTER = { type: 'spring', stiffness: 160, damping: 24 } as const;
+const SPRING_EXPAND = { type: 'spring', stiffness: 220, damping: 30 } as const;
+const SPRING_RECEDE = { type: 'spring', stiffness: 200, damping: 30 } as const;
+const SPRING_SEND = { type: 'spring', stiffness: 280, damping: 32 } as const;
 
 type Phase = 'idle' | 'opening' | 'letters' | 'sending' | 'granted';
 
@@ -433,7 +433,7 @@ function WishLetter({ index, value, onChange, sealed, onSeal, isSending, focused
   const [textareaActive, setTextareaActive] = useState(false);
 
   const isExpanded = !sealed && focusedIndex === index;
-  const isReceded  = focusedIndex !== null && focusedIndex !== index;
+  const isReceded = focusedIndex !== null && focusedIndex !== index;
 
   useEffect(() => {
     if (!sealed && textareaRef.current) {
@@ -629,8 +629,8 @@ function WishLetter({ index, value, onChange, sealed, onSeal, isSending, focused
 
         {!sealed && (
           <div className="px-5 pb-5 flex justify-center">
-            <motion.button 
-              onClick={onSeal} 
+            <motion.button
+              onClick={onSeal}
               onPointerDown={(e) => e.preventDefault()}
               disabled={!value.trim()}
               className="relative px-6 py-2 rounded-full font-playfair italic text-white overflow-hidden tracking-wide"
@@ -755,7 +755,7 @@ function GenieReveal({ wishes }: { wishes: [string, string, string] }) {
       .then(d => setResponses(Array.isArray(d.responses) ? d.responses : []))
       .catch(() => setResponses([]))
       .finally(() => setLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -910,7 +910,7 @@ function GenieReveal({ wishes }: { wishes: [string, string, string] }) {
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.1, delay: 2.2, ease: EASE }}
       >
-        <p className="font-playfair italic" style={{
+        <p className="font-playfair font-semibold italic" style={{
           fontSize: 15.5, color: 'rgba(30,41,59,0.58)', letterSpacing: '0.08em', lineHeight: 2.1,
         }}>
           With all the magic woven into every spring day,<br />
@@ -1173,10 +1173,10 @@ export default function GenieWish() {
       <AnimatePresence>
         {phase === 'granted' && (
           <motion.div key="granted"
-            className="fixed inset-0 z-36 flex items-center justify-center overflow-y-auto py-14"
+            className="fixed inset-0 z-36 flex overflow-y-auto overflow-x-hidden pointer-events-auto scroll-smooth"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.9 }}
           >
-            <div className="w-full pointer-events-auto">
+            <div className="w-full min-h-full flex flex-col justify-start pb-24">
               <GenieReveal wishes={wishes} />
             </div>
           </motion.div>
