@@ -1114,7 +1114,7 @@ export default function GenieWish() {
       <AnimatePresence>
         {showEnvelope && (
           <motion.div key="scene"
-            className="fixed inset-0 z-[36] flex flex-col items-center justify-center pointer-events-none"
+            className="fixed inset-0 z-36 flex flex-col items-center justify-center pointer-events-none"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.6 } }}
           >
             <motion.div className="pointer-events-auto relative"
@@ -1173,7 +1173,7 @@ export default function GenieWish() {
       <AnimatePresence>
         {phase === 'granted' && (
           <motion.div key="granted"
-            className="fixed inset-0 z-[36] flex items-center justify-center overflow-y-auto py-14"
+            className="fixed inset-0 z-36 flex items-center justify-center overflow-y-auto py-14"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.9 }}
           >
             <div className="w-full pointer-events-auto">
