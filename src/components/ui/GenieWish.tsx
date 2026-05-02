@@ -940,11 +940,16 @@ function MagicBackground({ phase }: { phase: Phase | null }) {
       animate={{ opacity: phase !== null ? 1 : 0 }}
       transition={{ duration: 1.4, ease: EASE }}
     >
+      {/* UPDATE THIS DIV: */}
       <motion.div className="absolute inset-0"
+        style={{
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
         animate={{
           background: isGranted
-            ? 'radial-gradient(ellipse 110% 90% at 50% 60%, rgba(255,228,240,0.90) 0%, rgba(252,235,244,0.72) 55%, rgba(245,215,235,0.45) 100%)'
-            : 'radial-gradient(ellipse 110% 100% at 50% 45%, rgba(6,8,26,0.88) 0%, rgba(10,7,22,0.93) 55%, rgba(4,4,18,0.80) 100%)',
+            ? 'rgba(255, 228, 240, 0.35)' // Sheer pink sky glass
+            : 'rgba(6, 8, 26, 0.55)',     // Sheer night sky glass
         }}
         transition={{ duration: 1.8, ease: EASE }}
       />

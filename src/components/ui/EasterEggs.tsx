@@ -9,7 +9,7 @@ import { useStoryStore } from '@/store/useStoryStore';
 // ─────────────────────────────────────────────────────────────
 const SPRING_APPEAR = 0.95;
 const SPRING_FULL = 0.88;
-const SPRING_BG_TINT = 'rgba(252, 233, 240, 0.72)';
+const SPRING_BG_TINT = 'rgba(252, 233, 240, 0.15)';
 
 // ─────────────────────────────────────────────────────────────
 //  Data
@@ -270,13 +270,6 @@ function ArtisanalChocolate({ t, visible, isHero, layoutId }: { t: Treat; visibl
 }
 
 // ─────────────────────────────────────────────────────────────
-//  Ambient petal echo
-// ─────────────────────────────────────────────────────────────
-const ECHO_PETALS = Array.from({ length: 9 }, (_, i) => ({
-  id: i, left: `${8 + i * 10.5}%`, delay: `${i * 0.55}s`, duration: `${3.8 + (i % 3) * 0.9}s`, size: 10 + (i % 4) * 5, hue: 338 + (i % 5) * 5,
-}));
-
-// ─────────────────────────────────────────────────────────────
 //  Main component
 // ─────────────────────────────────────────────────────────────
 export default function EasterEggs() {
@@ -321,20 +314,6 @@ export default function EasterEggs() {
 
   return (
     <>
-      {/* ── Ambient CSS petal echoes ── */}
-      <div className="fixed inset-0 pointer-events-none z-10 overflow-hidden">
-        <motion.div style={{ opacity: petalOpacity }} className="absolute inset-0">
-          {ECHO_PETALS.map(p => (
-            <div key={p.id} className="absolute top-0" style={{ left: p.left, width: p.size, height: p.size * 1.55, animation: `petalDrift ${p.duration} ease-in-out ${p.delay} infinite both` }}>
-              <svg viewBox="0 0 40 64" fill="none" style={{ width: '100%', height: '100%' }}>
-                <path d="M20 62 C6 46 4 14 20 2 C36 14 34 46 20 62Z" fill={`hsla(${p.hue}, 80%, 88%, 0.72)`} />
-                <path d="M20 62 C6 46 4 14 20 2 C36 14 34 46 20 62Z" stroke={`hsla(${p.hue}, 70%, 75%, 0.30)`} strokeWidth="0.5" />
-                <path d="M20 58 Q20 32 20 6" stroke={`hsla(${p.hue}, 50%, 68%, 0.22)`} strokeWidth="0.6" />
-              </svg>
-            </div>
-          ))}
-        </motion.div>
-      </div>
 
       {/* ── Main UI layer ── */}
       <div className="fixed inset-0 pointer-events-none z-20 overflow-hidden">
@@ -406,17 +385,6 @@ export default function EasterEggs() {
           </div>
         </div>
       </div>
-
-      {/* ── Keyframe injection ── */}
-      <style>{`
-        @keyframes petalDrift {
-          0%   { transform: translateY(-20px) rotate(0deg)   translateX(0px);   opacity: 0; }
-          8%   { opacity: 1; }
-          50%  { transform: translateY(50vh)  rotate(180deg) translateX(18px);  opacity: 0.75; }
-          92%  { opacity: 0.4; }
-          100% { transform: translateY(102vh) rotate(340deg) translateX(-8px);  opacity: 0; }
-        }
-      `}</style>
     </>
   );
 }

@@ -107,12 +107,16 @@ export default function StoryOverlay() {
     >
       {/* Sticky viewport */}
       <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
-        {/* Vignette — subtle, purely atmospheric */}
+        {/* Vignette — fades out for the bright spring scenes (phrases 5 & 6) */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none transition-opacity duration-1000"
           style={{
-            background:
-              'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, rgba(0,0,0,0.22) 100%)',
+            background: 'radial-gradient(ellipse 70% 60% at 50% 50%, transparent 40%, rgba(0,0,0,0.22) 100%)',
+            // IS_DARK_BG tells us if the text is dark (which means the background is bright pink)
+            // We want to hide the black vignette when the background is bright.
+            opacity: textRefs.current.some((ref, i) =>
+              ref && Number(ref.style.opacity) > 0.1 && IS_DARK_BG[i]
+            ) ? 0 : 1
           }}
         />
 

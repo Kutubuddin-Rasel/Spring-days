@@ -202,13 +202,13 @@ export default function SnowParticles({ count = 1400 }: { count?: number }) {
 
     // Global slow-down as spring approaches (progress 0 → 0.55)
     // Ease to near-zero by the transition point
-    const slowFactor = 1 - smoothstep(clamp01(progress / 0.60));
+    const slowFactor = 1 - smoothstep(clamp01(progress / 0.45));
     // Subtle "final breath" drift — keeps a few specks moving at spring
     const minFactor = 0.04;
     const speedMult = minFactor + (1 - minFactor) * slowFactor;
 
-    // Opacity: full until 0.55, then fade by 0.70
-    const opacityT = clamp01((progress - 0.55) / 0.15);
+    // Opacity: full until 0.35, then fade by 0.45
+    const opacityT = clamp01((progress - 0.35) / 0.10);
     const targetOp = (1 - smoothstep(opacityT)) * 0.82;
     const mat = shaderMaterial;
     // Smooth the opacity so it doesn't snap

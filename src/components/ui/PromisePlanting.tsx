@@ -672,16 +672,19 @@ interface BgSyncProps {
 }
 
 function BackgroundSync({ plantedCount, progress, isComplete }: BgSyncProps) {
-  const palette = PALETTES[Math.min(plantedCount, PALETTES.length - 1)];
-
   return (
     <motion.div
       className="fixed inset-0 pointer-events-none"
-      style={{ zIndex: 0 }}
+      style={{ 
+        zIndex: 0,
+        // The frosted glass effect
+        backdropFilter: 'blur(2px)',
+        WebkitBackdropFilter: 'blur(2px)',
+      }}
       animate={{
         background: isComplete
-          ? 'radial-gradient(ellipse 100% 80% at 50% 80%, rgba(255,230,242,0.72) 0%, rgba(252,233,240,0.50) 50%, transparent 100%)'
-          : palette.bloom,
+          ? 'rgba(255, 240, 248, 0.25)' // Sheer pink glass for the climax
+          : 'rgba(255, 255, 255, 0.08)', // Almost clear sheer glass for planting
         opacity: Math.min(1, (progress - 0.96) * 40),
       }}
       transition={{ duration: 1.2, ease: APPLE_EASE }}

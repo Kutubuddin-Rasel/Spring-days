@@ -29,8 +29,8 @@ const SKY_STOPS: ColorStop[] = [
   { t: new THREE.Color('#1c1430'), at: 0.42 },
   { t: new THREE.Color('#7a3852'), at: 0.58 },
   { t: new THREE.Color('#f0b8c8'), at: 0.72 },
-  { t: new THREE.Color('#fce9f0'), at: 0.85 },
-  { t: new THREE.Color('#fdf4f7'), at: 1.00 },
+  { t: new THREE.Color('#eeb4c8'), at: 0.85 },
+  { t: new THREE.Color('#e8a5bc'), at: 1.00 },
 ];
 
 // Sample the multi-stop palette at position t ∈ [0,1]
@@ -99,7 +99,7 @@ function EnvironmentManager() {
       const winterAmb = new THREE.Color(0x2a3d5f);
       const springAmb = new THREE.Color(0xfff0e0);
       ambientRef.current.color.lerpColors(winterAmb, springAmb, Math.min(1, p / 0.8));
-      ambientRef.current.intensity = THREE.MathUtils.lerp(0.6, 1.8, Math.min(1, p / 0.8));
+      ambientRef.current.intensity = THREE.MathUtils.lerp(0.6, 0.85, Math.min(1, p / 0.8));
     }
 
     if (dirRef.current) {
@@ -107,7 +107,7 @@ function EnvironmentManager() {
       const winterSun = new THREE.Color(0x8ab4d4);
       const springSun = new THREE.Color(0xffe8b0);
       dirRef.current.color.lerpColors(winterSun, springSun, Math.min(1, p / 0.75));
-      dirRef.current.intensity = THREE.MathUtils.lerp(0.4, 1.4, Math.min(1, p / 0.75));
+      dirRef.current.intensity = THREE.MathUtils.lerp(0.4, 1.1, Math.min(1, p / 0.75));
 
       // Sun elevation
       const elevation = THREE.MathUtils.lerp(0.3, 1.0, Math.min(1, p / 0.8));
@@ -182,7 +182,7 @@ export default function Scene() {
       >
         <EnvironmentManager />
         <SnowParticles count={1400} />
-        <CherryBlossomParticles count={600} />
+        <CherryBlossomParticles />
       </Canvas>
     </div>
   );
